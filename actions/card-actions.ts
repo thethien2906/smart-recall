@@ -150,3 +150,72 @@ export async function deleteCard(cardId: string) {
   revalidatePath(`/decks/${card.deck_id}`);
   return { success: true };
 }
+
+/**
+ * Phase 4: Cập nhật nội dung thẻ (Question & Answer)
+ */
+export async function updateCardContent(
+  cardId: string,
+  question: string,
+  answer: string
+) {
+  const supabase = await createClient();
+
+  // Auth check
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  // Validation
+  if (!question || question.trim().length === 0) {
+    return { error: "Câu hỏi không được để trống" };
+  }
+
+  if (!answer || answer.trim().length === 0) {
+    return { error: "Câu trả lời không được để trống" };
+  }
+
+  // Kiểm tra card có tồn tại và thuộc về user không
+  const { data: card, error: cardError } = await supabase
+    .from("cards")
+    .select(`
+      id,
+      deck_id,
+      decks!inner(user_id)
+    `)
+    .eq("id", cardId)
+    .single();
+
+  if (cardError || !card) {
+    return { error: "Không tìm thấy thẻ hoặc bạn không có quyền truy cập" };
+  }
+
+  // @ts-expect-error - Supabase typing issue with nested relations
+  if (card.decks.user_id !== user.id) {
+    return { error: "Unauthorized" };
+  }
+
+  // Update card
+  const { error: updateError } = await supabase
+    .from("cards")
+    .update({
+      question: question.trim(),
+      answer: answer.trim(),
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", cardId);
+
+  if (updateError) {
+    return { error: "Lỗi khi cập nhật thẻ: " + updateError.message };
+  }
+
+  // Revalidate paths
+  revalidatePath(`/decks/${card.deck_id}`);
+  revalidatePath(`/study/${card.deck_id}`);
+
+  return { error: null, success: true };
+}

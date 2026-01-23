@@ -110,6 +110,7 @@ export function StudyClient({ deckId, deckTitle, initialCards }: StudyClientProp
 
       {currentCard && (
         <Flashcard
+          cardId={currentCard.id}
           question={currentCard.question}
           answer={currentCard.answer}
           onRate={handleRate}

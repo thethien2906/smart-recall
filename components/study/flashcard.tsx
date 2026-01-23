@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EditCardDialog } from "./edit-card-dialog";
 
 interface FlashcardProps {
+  cardId: string;
   question: string;
   answer: string;
   onRate: (rating: "again" | "hard" | "good" | "easy") => void;
@@ -14,6 +16,7 @@ interface FlashcardProps {
 }
 
 export function Flashcard({
+  cardId,
   question,
   answer,
   onRate,
@@ -53,6 +56,15 @@ export function Flashcard({
       {/* Flashcard */}
       <Card className="min-h-[400px] flex flex-col">
         <CardContent className="flex-1 flex flex-col p-8">
+          {/* Header với nút Edit */}
+          <div className="flex justify-end mb-4">
+            <EditCardDialog
+              cardId={cardId}
+              initialQuestion={question}
+              initialAnswer={answer}
+            />
+          </div>
+
           {/* Question (Always visible) */}
           <div className="flex-1 flex flex-col justify-center space-y-6">
             <div className="flex items-center gap-2">

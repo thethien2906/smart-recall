@@ -49,7 +49,7 @@ export async function createDeck(formData: FormData): Promise<void> {
 }
 
 /**
- * Lấy danh sách tất cả Decks của user
+ * Lấy danh sách tất cả Decks của user (Phase 4: Include due cards info)
  */
 export async function getDecks() {
   const supabase = await createClient();
@@ -62,12 +62,16 @@ export async function getDecks() {
     return { error: "Unauthorized" };
   }
 
+  // Lấy decks với thông tin cards
   const { data: decks, error } = await supabase
     .from("decks")
     .select(
       `
       *,
-      cards (count)
+      cards (
+        id,
+        next_review_at
+      )
     `
     )
     .eq("user_id", user.id)

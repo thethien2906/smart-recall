@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { calculateNextReview, type Rating } from "@/lib/srs-algorithm";
 
 /**
  * Phase 3: Get Due Cards
@@ -59,13 +60,12 @@ export async function getDueCards(deckId: string) {
 }
 
 /**
- * Phase 3: Submit Review (Logic tạm thời)
- * Nhận rating và cập nhật next_review_at
- * Phase 3: Chỉ cộng thêm 1 ngày, chưa dùng thuật toán SRS
+ * Phase 4: Submit Review (Sử dụng thuật toán SM-2)
+ * Nhận rating và cập nhật interval, ease_factor, next_review_at
  */
 export async function submitReview(
   cardId: string,
-  rating: "again" | "hard" | "good" | "easy"
+  rating: Rating
 ) {
   const supabase = await createClient();
 
@@ -78,12 +78,14 @@ export async function submitReview(
     return { error: "Unauthorized" };
   }
 
-  // Kiểm tra card có tồn tại và thuộc về user không
+  // Lấy thông tin card hiện tại (cần interval và ease_factor)
   const { data: card, error: cardError } = await supabase
     .from("cards")
     .select(`
       id,
       deck_id,
+      interval,
+      ease_factor,
       decks!inner(user_id)
     `)
     .eq("id", cardId)
@@ -98,18 +100,25 @@ export async function submitReview(
     return { error: "Unauthorized" };
   }
 
-  // Phase 3: Logic tạm thời - cộng thêm 1 ngày
-  // Phase 4 sẽ implement thuật toán SM-2 thật sự
-  const now = new Date();
-  const nextReviewDate = new Date(now);
-  nextReviewDate.setDate(nextReviewDate.getDate() + 1); // Cộng 1 ngày
+  // Phase 4: Sử dụng thuật toán SM-2
+  const currentInterval = card.interval || 0;
+  const currentEaseFactor = card.ease_factor || 2.5;
 
-  // Cập nhật next_review_at
+  // Tính toán giá trị mới
+  const { interval, easeFactor, nextReviewDate } = calculateNextReview(
+    currentInterval,
+    currentEaseFactor,
+    rating
+  );
+
+  // Cập nhật database với giá trị mới
   const { error: updateError } = await supabase
     .from("cards")
     .update({
+      interval,
+      ease_factor: easeFactor,
       next_review_at: nextReviewDate.toISOString(),
-      updated_at: now.toISOString()
+      updated_at: new Date().toISOString()
     })
     .eq("id", cardId);
 

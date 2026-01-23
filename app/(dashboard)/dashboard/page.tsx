@@ -22,7 +22,14 @@ export default async function DashboardPage() {
 
   const { decks } = result
   const totalDecks = decks?.length || 0
-  const totalCards = decks?.reduce((sum, deck) => sum + (deck.cards?.[0]?.count || 0), 0) || 0
+  const totalCards = decks?.reduce((sum, deck) => sum + (deck.cards?.length || 0), 0) || 0
+  
+  // Phase 4: Tính số thẻ cần ôn hôm nay
+  const now = new Date()
+  const dueCardsToday = decks?.reduce((sum, deck) => {
+    const dueCards = deck.cards?.filter(card => new Date(card.next_review_at) <= now).length || 0
+    return sum + dueCards
+  }, 0) || 0
 
   return (
     <div className="space-y-8">
@@ -61,8 +68,10 @@ export default async function DashboardPage() {
             <CardTitle className="text-lg">Thẻ cần ôn hôm nay</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-orange-500">Sắp có</p>
-            <p className="text-xs text-muted-foreground mt-1">Phase 3</p>
+            <p className="text-4xl font-bold text-orange-500">{dueCardsToday}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {dueCardsToday > 0 ? "Hãy bắt đầu học ngay!" : "Bạn đã hoàn thành hôm nay!"}
+            </p>
           </CardContent>
         </Card>
       </div>

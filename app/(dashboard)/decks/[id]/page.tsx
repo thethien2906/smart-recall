@@ -6,6 +6,7 @@ import { ArrowLeft, Plus, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CardsList } from '@/components/decks/cards-list'
+import { DeleteDeckDialog } from '@/components/decks/delete-deck-dialog'
 
 type Props = {
   params: {
@@ -42,6 +43,7 @@ export default async function DeckDetailPage({ params }: Props) {
             <p className="text-muted-foreground mt-1">{deck.description}</p>
           )}
         </div>
+        <DeleteDeckDialog deckId={id} deckTitle={deck.title} />
       </div>
 
       {/* Stats & Actions */}
