@@ -56,7 +56,14 @@ export default async function DeckDetailPage({ params }: Props) {
         </Card>
 
         <div className="flex gap-2">
-          <Button asChild>
+          {cardCount > 0 && (
+            <Button asChild size="lg" className="font-semibold">
+              <Link href={`/study/${id}`}>
+                Học ngay
+              </Link>
+            </Button>
+          )}
+          <Button asChild variant="outline">
             <Link href={`/decks/${id}/import`}>
               <Upload className="mr-2 h-4 w-4" />
               Import JSON
