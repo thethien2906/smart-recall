@@ -9,30 +9,41 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil } from "lucide-react";
 import { updateCardContent } from "@/actions/card-actions";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EditCardDialogProps {
-  cardId: string;
-  initialQuestion: string;
-  initialAnswer: string;
-  trigger?: React.ReactNode;
+  card: {
+    id: string;
+    question: string;
+    answer: string;
+    type: string;
+  };
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function EditCardDialog({
-  cardId,
-  initialQuestion,
-  initialAnswer,
-  trigger,
-}: EditCardDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [question, setQuestion] = useState(initialQuestion);
-  const [answer, setAnswer] = useState(initialAnswer);
+const CARD_TYPES = [
+  { value: "concept", label: "Concept (Khái niệm)" },
+  { value: "scenario", label: "Scenario (Tình huống)" },
+  { value: "choice", label: "Choice (Lựa chọn)" },
+  { value: "code", label: "Code (Lập trình)" },
+];
+
+export function EditCardDialog({ card, isOpen, onClose }: EditCardDialogProps) {
+  const [question, setQuestion] = useState(card.question);
+  const [answer, setAnswer] = useState(card.answer);
+  const [type, setType] = useState(card.type);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -42,12 +53,12 @@ export function EditCardDialog({
     setError(null);
 
     startTransition(async () => {
-      const result = await updateCardContent(cardId, question, answer);
+      const result = await updateCardContent(card.id, question, answer, type);
 
       if (result.error) {
         setError(result.error);
       } else {
-        setOpen(false);
+        onClose();
         router.refresh();
       }
     });
@@ -55,30 +66,40 @@ export function EditCardDialog({
 
   const handleCancel = () => {
     // Reset về giá trị ban đầu khi đóng
-    setQuestion(initialQuestion);
-    setAnswer(initialAnswer);
+    setQuestion(card.question);
+    setAnswer(card.answer);
+    setType(card.type);
     setError(null);
-    setOpen(false);
+    onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="ghost" size="icon" title="Chỉnh sửa thẻ">
-            <Pencil className="h-4 w-4" />
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Chỉnh sửa thẻ</DialogTitle>
           <DialogDescription>
-            Sửa lại câu hỏi hoặc câu trả lời nếu ChatGPT tạo sai.
+            Sửa lại câu hỏi, câu trả lời hoặc loại thẻ nếu ChatGPT tạo sai.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="type">Loại thẻ</Label>
+            <Select value={type} onValueChange={setType} disabled={isPending}>
+              <SelectTrigger id="type">
+                <SelectValue placeholder="Chọn loại thẻ" />
+              </SelectTrigger>
+              <SelectContent>
+                {CARD_TYPES.map((cardType) => (
+                  <SelectItem key={cardType.value} value={cardType.value}>
+                    {cardType.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="question">Câu hỏi</Label>
             <Textarea

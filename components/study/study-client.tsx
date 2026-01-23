@@ -113,6 +113,7 @@ export function StudyClient({ deckId, deckTitle, initialCards }: StudyClientProp
           cardId={currentCard.id}
           question={currentCard.question}
           answer={currentCard.answer}
+          type={currentCard.type || "concept"}
           onRate={handleRate}
           currentIndex={currentIndex}
           totalCards={cards.length}

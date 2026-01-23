@@ -21,10 +21,15 @@ export async function createDeck(formData: FormData): Promise<void> {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const category = formData.get("category") as string;
 
   // Validation
   if (!title || title.trim().length === 0) {
     throw new Error("Tên Deck không được để trống");
+  }
+
+  if (!category || category.trim().length === 0) {
+    throw new Error("Vui lòng chọn danh mục");
   }
 
   // Insert vào database
@@ -34,6 +39,7 @@ export async function createDeck(formData: FormData): Promise<void> {
       user_id: user.id,
       title: title.trim(),
       description: description?.trim() || null,
+      category: category.trim(),
     })
     .select()
     .single();
@@ -49,9 +55,9 @@ export async function createDeck(formData: FormData): Promise<void> {
 }
 
 /**
- * Lấy danh sách tất cả Decks của user (Phase 4: Include due cards info)
+ * Lấy danh sách tất cả Decks của user (Phase 6: Support category filtering)
  */
-export async function getDecks() {
+export async function getDecks(category?: string) {
   const supabase = await createClient();
 
   const {
@@ -62,8 +68,8 @@ export async function getDecks() {
     return { error: "Unauthorized" };
   }
 
-  // Lấy decks với thông tin cards
-  const { data: decks, error } = await supabase
+  // Build query với category filter (nếu có)
+  let query = supabase
     .from("decks")
     .select(
       `
@@ -74,8 +80,17 @@ export async function getDecks() {
       )
     `
     )
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .eq("user_id", user.id);
+
+  // Apply category filter nếu được chỉ định
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  // Sort by updated_at (deck mới cập nhật lên đầu)
+  const { data: decks, error } = await query.order("updated_at", {
+    ascending: false,
+  });
 
   if (error) {
     console.error("Error fetching decks:", error);
@@ -117,6 +132,88 @@ export async function getDeck(deckId: string) {
   }
 
   return { deck };
+}
+
+/**
+ * Lấy danh sách categories có trong database
+ */
+export async function getCategories() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { data: decks, error } = await supabase
+    .from("decks")
+    .select("category")
+    .eq("user_id", user.id)
+    .not("category", "is", null);
+
+  if (error) {
+    console.error("Error fetching categories:", error);
+    return { categories: [] };
+  }
+
+  // Extract unique categories và sort
+  const categories = Array.from(
+    new Set(decks.map((d) => d.category).filter(Boolean))
+  ).sort();
+
+  return { categories };
+}
+
+/**
+ * Tìm kiếm Deck theo tên
+ */
+export async function searchDecks(query: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  // Validate query length
+  const trimmedQuery = query.trim();
+  if (trimmedQuery.length > 100) {
+    return { error: "Từ khóa tìm kiếm quá dài" };
+  }
+
+  // Nếu query rỗng, trả về tất cả decks
+  if (trimmedQuery.length === 0) {
+    return getDecks();
+  }
+
+  // Search với ILIKE (case-insensitive)
+  const { data: decks, error } = await supabase
+    .from("decks")
+    .select(
+      `
+      *,
+      cards (
+        id,
+        next_review_at
+      )
+    `
+    )
+    .eq("user_id", user.id)
+    .ilike("title", `%${trimmedQuery}%`)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    console.error("Error searching decks:", error);
+    return { error: "Không thể tìm kiếm Deck" };
+  }
+
+  return { decks };
 }
 
 /**

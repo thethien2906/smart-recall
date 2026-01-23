@@ -8,6 +8,7 @@ type Deck = {
   id: string
   title: string
   description: string | null
+  category: string | null
   created_at: string
   cards?: Array<{
     id: string
@@ -34,14 +35,19 @@ export function DeckGrid({ decks }: Props) {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="line-clamp-1 text-base md:text-lg">{deck.title}</CardTitle>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {deck.category && (
+                      <Badge variant="outline" className="text-xs shrink-0">
+                        {deck.category}
+                      </Badge>
+                    )}
                     {dueCards > 0 && (
                       <Badge variant="destructive" className="text-xs shrink-0">
                         {dueCards}
                       </Badge>
                     )}
                   </div>
+                  <CardTitle className="line-clamp-1 text-base md:text-lg">{deck.title}</CardTitle>
                   {deck.description && (
                     <CardDescription className="line-clamp-2 text-xs md:text-sm">
                       {deck.description}

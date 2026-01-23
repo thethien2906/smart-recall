@@ -60,6 +60,18 @@ export function CreateDeckDialog({ children }: { children?: React.ReactNode }) {
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="category">Danh mục *</Label>
+              <Input
+                id="category"
+                name="category"
+                placeholder="Ví dụ: Programming, Music Theory, Language..."
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Nhập danh mục để dễ dàng phân loại và tìm kiếm
+              </p>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="description">Mô tả (tùy chọn)</Label>
               <Textarea
                 id="description"

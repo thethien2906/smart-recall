@@ -3,10 +3,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { Trash2, Edit } from "lucide-react"
 import { deleteCard } from "@/actions/card-actions"
 import { useState, useTransition } from "react"
 import { MarkdownViewer } from "@/components/ui/markdown-viewer"
+import { EditCardDialog } from "@/components/study/edit-card-dialog"
 
 type Card = {
   id: string
@@ -40,9 +41,10 @@ export function CardsList({ cards }: Props) {
 function CardItem({ card }: { card: Card }) {
   const [isPending, startTransition] = useTransition()
   const [isDeleted, setIsDeleted] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const handleDelete = () => {
-    if (!confirm("Bạn có chắc muốn xóa thẻ này?")) return
+    if (!confirm("Bạn có chắc muốn xóa thẻ này? Hành động không thể hoàn tác.")) return
 
     startTransition(async () => {
       const result = await deleteCard(card.id)
@@ -55,35 +57,54 @@ function CardItem({ card }: { card: Card }) {
   if (isDeleted) return null
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-1">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                {card.type}
-              </Badge>
+    <>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  {card.type}
+                </Badge>
+              </div>
+              <CardTitle className="text-base">{card.question}</CardTitle>
             </div>
-            <CardTitle className="text-base">{card.question}</CardTitle>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsEditOpen(true)}
+                disabled={isPending}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDelete}
+                disabled={isPending}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDelete}
-            disabled={isPending}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {card.answer ? (
-          <MarkdownViewer content={card.answer} className="text-sm" />
-        ) : (
-          <CardDescription className="italic text-muted-foreground/60">
-          </CardDescription>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          {card.answer ? (
+            <MarkdownViewer content={card.answer} className="text-sm" />
+          ) : (
+            <CardDescription className="italic text-muted-foreground/60">
+          
+            </CardDescription>
+          )}
+        </CardContent>
+      </Card>
+
+      <EditCardDialog
+        card={card}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+      />
+    </>
   )
 }

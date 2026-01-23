@@ -1,5 +1,5 @@
 import { getDeck } from '@/actions/deck-actions'
-import { getCards } from '@/actions/card-actions'
+import { getCardsByDeck } from '@/actions/card-actions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Plus, Upload } from 'lucide-react'
@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CardsList } from '@/components/decks/cards-list'
 import { DeleteDeckDialog } from '@/components/decks/delete-deck-dialog'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
   params: {
@@ -18,7 +19,7 @@ export default async function DeckDetailPage({ params }: Props) {
   const { id } = await params
   
   const deckResult = await getDeck(id)
-  const cardsResult = await getCards(id)
+  const cardsResult = await getCardsByDeck(id)
 
   if ('error' in deckResult) {
     notFound()
@@ -38,7 +39,12 @@ export default async function DeckDetailPage({ params }: Props) {
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{deck.title}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{deck.title}</h1>
+            {deck.category && (
+              <Badge variant="secondary">{deck.category}</Badge>
+            )}
+          </div>
           {deck.description && (
             <p className="text-muted-foreground mt-1">{deck.description}</p>
           )}

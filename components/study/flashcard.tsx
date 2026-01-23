@@ -11,6 +11,7 @@ interface FlashcardProps {
   cardId: string;
   question: string;
   answer: string;
+  type: string;
   onRate: (rating: "again" | "hard" | "good" | "easy") => void;
   currentIndex: number;
   totalCards: number;
@@ -20,11 +21,13 @@ export function Flashcard({
   cardId,
   question,
   answer,
+  type,
   onRate,
   currentIndex,
   totalCards,
 }: FlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   // Check xem câu hỏi có đáp án hay không
   const hasAnswer = answer && answer.trim().length > 0;
@@ -59,11 +62,14 @@ export function Flashcard({
         <CardContent className="flex-1 flex flex-col p-8">
           {/* Header với nút Edit */}
           <div className="flex justify-end mb-4">
-            <EditCardDialog
-              cardId={cardId}
-              initialQuestion={question}
-              initialAnswer={answer}
-            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditOpen(true)}
+              title="Chỉnh sửa thẻ"
+            >
+              <span className="text-sm">✏️</span>
+            </Button>
           </div>
 
           {/* Question (Always visible) */}
@@ -98,7 +104,6 @@ export function Flashcard({
                   Đáp án:
                 </div>
                 <MarkdownViewer content={answer} className="text-lg" />
-                </div>
               </div>
             )}
           </div>
@@ -158,6 +163,13 @@ export function Flashcard({
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Card Dialog */}
+      <EditCardDialog
+        card={{ id: cardId, question, answer, type }}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+      />
     </div>
   );
 }
