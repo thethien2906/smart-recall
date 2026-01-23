@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EditCardDialog } from "./edit-card-dialog";
+import { MarkdownViewer } from "@/components/ui/markdown-viewer";
 
 interface FlashcardProps {
   cardId: string;
@@ -96,8 +97,7 @@ export function Flashcard({
                 <div className="text-sm font-medium text-muted-foreground">
                   Đáp án:
                 </div>
-                <div className="text-lg leading-relaxed whitespace-pre-wrap text-foreground/90">
-                  {answer}
+                <MarkdownViewer content={answer} className="text-lg" />
                 </div>
               </div>
             )}
@@ -116,41 +116,41 @@ export function Flashcard({
               </Button>
             ) : (
               /* Nếu KHÔNG có đáp án HOẶC đã flip: Hiện 4 nút rating luôn */
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                 <Button
                   onClick={() => handleRate("again")}
                   variant="destructive"
-                  className="w-full"
+                  className="w-full min-h-[44px]"
                 >
                   <span className="flex flex-col items-center gap-1">
-                    <span className="font-semibold">Again</span>
+                    <span className="font-semibold text-sm md:text-base">Again</span>
                   </span>
                 </Button>
                 <Button
                   onClick={() => handleRate("hard")}
                   variant="outline"
-                  className="w-full border-orange-500 text-orange-600 hover:bg-orange-50"
+                  className="w-full min-h-[44px] border-orange-500 text-orange-600 hover:bg-orange-50"
                 >
                   <span className="flex flex-col items-center gap-1">
-                    <span className="font-semibold">Hard</span>
+                    <span className="font-semibold text-sm md:text-base">Hard</span>
                   </span>
                 </Button>
                 <Button
                   onClick={() => handleRate("good")}
                   variant="outline"
-                  className="w-full border-blue-500 text-blue-600 hover:bg-blue-50"
+                  className="w-full min-h-[44px] border-blue-500 text-blue-600 hover:bg-blue-50"
                 >
                   <span className="flex flex-col items-center gap-1">
-                    <span className="font-semibold">Good</span>
+                    <span className="font-semibold text-sm md:text-base">Good</span>
                   </span>
                 </Button>
                 <Button
                   onClick={() => handleRate("easy")}
                   variant="outline"
-                  className="w-full border-green-500 text-green-600 hover:bg-green-50"
+                  className="w-full min-h-[44px] border-green-500 text-green-600 hover:bg-green-50"
                 >
                   <span className="flex flex-col items-center gap-1">
-                    <span className="font-semibold">Easy</span>
+                    <span className="font-semibold text-sm md:text-base">Easy</span>
                   </span>
                 </Button>
               </div>

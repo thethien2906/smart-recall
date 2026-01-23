@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { deleteCard } from "@/actions/card-actions"
 import { useState, useTransition } from "react"
+import { MarkdownViewer } from "@/components/ui/markdown-viewer"
 
 type Card = {
   id: string
@@ -77,9 +78,7 @@ function CardItem({ card }: { card: Card }) {
       </CardHeader>
       <CardContent>
         {card.answer ? (
-          <CardDescription className="whitespace-pre-wrap">
-            {card.answer}
-          </CardDescription>
+          <MarkdownViewer content={card.answer} className="text-sm" />
         ) : (
           <CardDescription className="italic text-muted-foreground/60">
           </CardDescription>

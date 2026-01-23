@@ -23,21 +23,21 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
       <header className="border-b bg-white dark:bg-slate-800 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
               SmartRecall
             </h1>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-slate-600 dark:text-slate-300">
+          <div className="flex items-center space-x-2 md:space-x-4">
+            <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 hidden sm:block">
               {user.email}
             </div>
             <form action={signOut}>
               <Button variant="outline" size="sm" type="submit">
-                <LogOut className="h-4 w-4 mr-2" />
-                Đăng xuất
+                <LogOut className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Đăng xuất</span>
               </Button>
             </form>
           </div>
@@ -45,7 +45,7 @@ export default async function DashboardLayout({
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6 md:py-8">
         {children}
       </main>
     </div>
