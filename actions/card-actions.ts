@@ -176,10 +176,6 @@ export async function updateCardContent(
     return { error: "Câu hỏi không được để trống" };
   }
 
-  if (!answer || answer.trim().length === 0) {
-    return { error: "Câu trả lời không được để trống" };
-  }
-
   // Validate type nếu có
   const validTypes = ["concept", "scenario", "choice", "code"];
   if (type && !validTypes.includes(type)) {

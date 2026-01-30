@@ -84,9 +84,7 @@ export function Flashcard({
                 </Badge>
               )}
             </div>
-            <div className="text-xl font-medium leading-relaxed whitespace-pre-wrap">
-              {question}
-            </div>
+            <MarkdownViewer content={question} className="text-xl font-medium" />
 
             {/* Instruction cho câu hỏi không có đáp án */}
             {!hasAnswer && (
